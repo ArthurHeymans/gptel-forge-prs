@@ -201,8 +201,10 @@ BUFFER-TEMPLATE is existing buffer content to use as a template structure."
       :context nil
       :callback (lambda (response info)
                   (cond
-                   (response
+                   ((stringp response)
                     (funcall callback response))
+                   ((and (consp response) (eq (car response) 'reasoning))
+                    nil) ; silently ignore reasoning traces
                    ((plist-get info :error)
                     (message "gptel-forge-prs: Error: %s"
                              (or (plist-get (plist-get info :error) :message)
