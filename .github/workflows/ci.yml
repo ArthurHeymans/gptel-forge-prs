@@ -35,6 +35,11 @@ jobs:
 
       - name: Byte-compile
         run: |
+          # transient 20260617's byte-compiled file can retain a runtime call to
+          # compat's static-when macro, which makes loading forge fail with
+          # "Invalid function: static-when" while compiling this package.  Load
+          # transient from source until the upstream package is fixed.
+          find ~/.emacs.d/elpa -path '*/transient-*/transient.elc' -delete
           emacs --batch \
             --eval "(require 'package)" \
             --eval "(add-to-list 'package-archives '(\"melpa\" . \"https://melpa.org/packages/\") t)" \
