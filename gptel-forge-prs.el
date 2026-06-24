@@ -195,14 +195,20 @@ BUFFER-TEMPLATE is existing buffer content to use as a template structure."
                   (when (and buffer-template (not (string-empty-p buffer-template)))
                     (format "PR template to follow:\n%s\n\n" buffer-template))
                   ;; Add the diff
-                  (format "Code changes:\n%s" diff))))
+                  (format "Code changes:\n%s" diff)))
+         (chunks nil))
     (gptel-forge-prs--request prompt
       :system gptel-forge-prs-pr-prompt
       :context nil
+      :stream t
       :callback (lambda (response info)
                   (cond
+                   ((and (stringp response) (plist-get info :stream))
+                    (push response chunks))
                    ((stringp response)
                     (funcall callback response))
+                   ((eq response t)
+                    (funcall callback (apply #'concat (nreverse chunks))))
                    ((and (consp response) (eq (car response) 'reasoning))
                     nil) ; silently ignore reasoning traces
                    ((plist-get info :error)
